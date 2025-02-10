@@ -7,7 +7,7 @@
     </h2>
     <h2 class="text-center">
         Dinero Disponible para prestamos:
-        <p id = "dinero">${{ session['dinero_admin'] }}</p>
+        <p id = "dinero">{{ session['dinero_admin'] }}</p>
     </h2>   
 
     <h1 class="text-center mb-4">Usuarios Registrados</h1>
@@ -60,16 +60,42 @@
     
     <div class="card-footer text-center">
         <small>Desarrollado con Flask y MySQL</small>
-    </div>  
+    </div> 
     
     <script>
-
-        // Reemplazar el valor de dinero disponible después de préstamo
-        if ({{ request.args.get('nuevo_dinero') | default(0) }}) {
-            let nuevoDinero = {{ request.args.get('nuevo_dinero') }};
-            document.getElementById("dinero").innerText = nuevoDinero;
-        }
-
+        document.addEventListener("DOMContentLoaded", function () {
+            // Formatear el saldo del administrador sin decimales
+            let dineroAdminTexto = document.getElementById("dinero").innerText.trim();
+            let dineroAdmin = parseFloat(dineroAdminTexto);
+            
+            if (!isNaN(dineroAdmin)) {
+                document.getElementById("dinero").innerText = 
+                    new Intl.NumberFormat("es-CO", { 
+                        style: "currency", 
+                        currency: "COP", 
+                        minimumFractionDigits: 0, 
+                        maximumFractionDigits: 0 
+                    }).format(dineroAdmin);
+            }
+    
+            // Formatear los valores de dinero de cada usuario en la tabla
+            let dineroUsuarios = document.querySelectorAll("#tablaUsuarios td:nth-child(5)"); // Columna 5 (Dinero)
+            
+            dineroUsuarios.forEach(td => {
+                let dineroTexto = td.innerText.trim();
+                let dinero = parseFloat(dineroTexto);
+                
+                if (!isNaN(dinero)) {
+                    td.innerText = new Intl.NumberFormat("es-CO", { 
+                        style: "currency", 
+                        currency: "COP", 
+                        minimumFractionDigits: 0, 
+                        maximumFractionDigits: 0 
+                    }).format(dinero);
+                }
+            });
+        });
+    
         function filtrarTabla() {
             let input = document.getElementById("filtroCedula").value.toLowerCase();
             let filas = document.querySelectorAll("#tablaUsuarios tr");
@@ -79,40 +105,8 @@
                 fila.style.display = cedula.includes(input) ? "" : "none";
             });
         }
-   
-        // Obtener el valor de la sesión en la etiqueta <p>
-        let dineroTexto = document.getElementById("dinero").innerText;
-
-        // Convertir a número
-        let dinero = parseFloat(dineroTexto);
-
-        // Formatearlo como moneda (COP - Peso Colombiano)
-        let dineroFormateado = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(dinero);
-
-        // Mostrar el resultado en el mismo <p>
-        document.getElementById("dinero").innerText = dineroFormateado;  
+    </script>
     
-
-    // Seleccionar todos los elementos con id "dinero2"
-        let dineroElementos = document.querySelectorAll("#dinero2");
-
-        dineroElementos.forEach(elemento => {
-        let dineroTexto = elemento.innerText.trim();  // Obtener el valor del <td>
-        let dinero = parseFloat(dineroTexto);  // Convertir a número
-
-        if (!isNaN(dinero)) {
-            // Formatear como moneda colombiana sin decimales
-            let dineroFormateado = new Intl.NumberFormat("es-CO", { 
-                style: "currency", 
-                currency: "COP",
-                minimumFractionDigits: 0, 
-                maximumFractionDigits: 0  
-            }).format(dinero);
-
-            // Actualizar el texto del <td>
-            elemento.innerText = dineroFormateado;
-        }
-    });
-</script>
-
+    
+    
 {% endblock %}

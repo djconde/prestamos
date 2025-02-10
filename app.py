@@ -16,19 +16,43 @@ login_manager.init_app(app)
 # Registrar Blueprint de autenticación
 app.register_blueprint(auth)
 
-# Ruta principal para mostrar los usuarios registrados
 @app.route('/')
 @login_required
 def index():
     # Conexión a la base de datos
-    conexion = obtener_conexion()
-    if conexion:
-        cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM usuarios")  # Asumiendo que la tabla es 'usuarios'        
-        usuarios = cursor.fetchall()  # Obtener todos los usuarios
-        conexion.close()  # Cerrar la conexión
-        return render_template('index.html', usuarios=usuarios)
-    return "Error al conectar a la base de datos"
+    conexion = obtener_conexion()   
+    if not conexion:
+        flash("❌ Error al conectar con la base de datos", "danger")
+        return "Error al conectar a la base de datos"
+    
+    cursor = conexion.cursor()
+
+    # Obtener el ID del usuario autenticado
+    id_usuario = current_user.id
+
+    # Obtener los datos actualizados del usuario desde la base de datos
+    cursor.execute("SELECT dinero FROM usuarios WHERE id = %s", (id_usuario,))
+    usuario_data = cursor.fetchone()
+    
+    if not usuario_data:
+        flash("❌ No se encontraron datos del usuario", "danger")
+        return redirect(url_for('logout'))  # Redirigir a logout si no existe en la BD
+
+    # Actualizar sesión con el dinero actual del usuario
+    dinero_admin = usuario_data[0]
+    session['dinero_admin'] = dinero_admin  # Almacena el dinero actualizado
+
+    # Obtener todos los usuarios para mostrarlos en el index
+    cursor.execute("SELECT * FROM usuarios")
+    usuarios = cursor.fetchall()
+
+    conexion.close()  # Cerrar la conexión
+
+    return render_template('index.html', 
+                           usuarios=usuarios, 
+                           id_usuario=id_usuario, 
+                           dinero_admin=dinero_admin)
+
 
 
 
@@ -130,7 +154,11 @@ def prestamo(id):
         return redirect(url_for('index'))
 
     cursor = conexion.cursor()
-
+    
+    if current_user.rol != 'admin':  # Solo admin puede hacer prestamos
+        flash("❌ Solo el usuario administrador puede hacer prestamos", "danger")
+        return redirect(url_for('index'))
+    
     if request.method == 'GET':
         # Obtener los datos del usuario con id = 13 (administrador)
         cursor.execute("SELECT dinero FROM usuarios WHERE id = 13")
@@ -141,8 +169,6 @@ def prestamo(id):
             return redirect(url_for('index'))
 
         saldo_admin = saldo_admin[0]  # El saldo del administrador (usuario con id = 13) 
-        #logging.warning(f"Saldo del administrador: {saldo_admin}")   #imprimir algun valor en consola          
-
         # Obtener los datos del usuario seleccionado
         cursor.execute("SELECT id, nombre, apellido, dinero, estado FROM usuarios WHERE id = %s", (id,))
         usuario = cursor.fetchone()       
@@ -157,6 +183,11 @@ def prestamo(id):
     # Aquí sigue el procesamiento del formulario POST...
     estado = request.form.get('estado')
     dinero = request.form.get('dinero', type=int, default=0)
+    nuevo_dinero = request.form.get('nuevo_dinero')  # Obtener el nuevo dinero enviado desde el formulario
+
+    # Depuración para ver si el valor de nuevo_dinero es correcto
+    logging.warning(f"Datos del formulario: {request.form}")
+    logging.warning(f"Nuevo dinero recibido: {nuevo_dinero}")
 
     # Validar que el estado es correcto
     if not estado or estado not in ["Aprobado", "Rechazado"]:
@@ -200,15 +231,24 @@ def prestamo(id):
 
     conexion.commit()
 
+    # Si el nuevo dinero enviado desde el formulario es diferente al dinero actual en la sesión, actualizar la sesión
+    if nuevo_dinero:
+        if nuevo_dinero != session.get('dinero_admin', None):
+            session['dinero_admin'] = nuevo_dinero  # Actualiza el valor en la sesión
+            logging.warning(f"Nuevo dinero guardado en sesión: {nuevo_dinero}")
+    
     # Obtener el nuevo saldo para mostrarlo en la vista actualizada
     cursor.execute("SELECT dinero FROM usuarios WHERE id = 13")
     nuevo_dinero = cursor.fetchone()[0]
     conexion.close()
 
-    flash("✅ Préstamo procesado correctamente", "success")    
+    flash("✅ Préstamo procesado correctamente", "success")
     
-    # Regresamos a la página principal con el nuevo monto actualizado
+    # Redirige a la página de index con el id_usuario y nuevo_dinero
     return redirect(url_for('index', id_usuario=id, nuevo_dinero=nuevo_dinero))
+
+    
+    
 
 # Ruta protegida para eliminar (solo admin)
 @app.route('/eliminar/<int:id>', methods=['GET'])
