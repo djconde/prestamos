@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h2 class="text-center text-light">
+        Informacion del usuario {{ usuario[1] }} {{ usuario[2] }} <br>
+        Username ${{ usuario[5] }} <br>        
+    </h2>
+    <h3 class="text-center text-success">
+        El monto disponible para prestar al usuario es: ${{ saldo_admin }}
+    </h3>
+    <h1 class="text-center mb-4 text-light">Realizar Prestamo</h1>
+    
+    <!-- Formulario de editar usuario -->
+    <div class="card bg-dark text-light border-secondary">
+        <div class="card-header bg-secondary text-light">
+            <h4>Ingresa el monto a prestar y cambia el estado del prestamo</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">                    
+                    <input type="number" class="form-control border-secondary" id="dinero" name="dinero" value="{{ usuario[3] }}">
+                </div>                                                    
+                <div class="mb-3">
+                    <label for="estado" class="form-label">Estado del Prestamo</label>
+                    <select class="form-select" id="estado" name="estado" required>
+                        <option value="Rechazado">Rechazado</option>
+                        <option value="Aprobado">Aprobado</option>
+                    </select>
+                </div>        
+
+                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            </form>                   
+        </div>
+        <div class="card-footer text-center bg-secondary">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Volver a la Lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

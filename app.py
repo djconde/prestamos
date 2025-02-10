@@ -146,8 +146,7 @@ def editar_usuarios(id):
 @app.route('/prestamo/<int:id>', methods=['GET', 'POST'])
 @login_required
 def prestamo(id):
-    """ Procesa la solicitud de préstamo, verificando saldo y actualizando el monto. """
-    
+    """ Procesa la solicitud de préstamo, verificando saldo y actualizando el monto. """    
     conexion = obtener_conexion()
     if not conexion:
         flash("❌ Error al conectar con la base de datos", "danger")
@@ -176,6 +175,12 @@ def prestamo(id):
         if not usuario:
             flash("❌ Usuario no encontrado", "danger")
             return redirect(url_for('index'))
+        
+        if usuario[4]=="Aprobado":
+            flash("❌ El usuario ya tiene un Prestamo aprobado, este no se puede modificar", "danger")
+            return redirect(url_for('index'))
+        
+        
 
         # Pasar todos los datos a la plantilla
         return render_template("prestamo.html", usuario=usuario, id=id, saldo_admin=saldo_admin)
@@ -183,11 +188,7 @@ def prestamo(id):
     # Aquí sigue el procesamiento del formulario POST...
     estado = request.form.get('estado')
     dinero = request.form.get('dinero', type=int, default=0)
-    nuevo_dinero = request.form.get('nuevo_dinero')  # Obtener el nuevo dinero enviado desde el formulario
-
-    # Depuración para ver si el valor de nuevo_dinero es correcto
-    logging.warning(f"Datos del formulario: {request.form}")
-    logging.warning(f"Nuevo dinero recibido: {nuevo_dinero}")
+    nuevo_dinero = request.form.get('nuevo_dinero')  # Obtener el nuevo dinero enviado desde el formulario    
 
     # Validar que el estado es correcto
     if not estado or estado not in ["Aprobado", "Rechazado"]:
@@ -205,7 +206,9 @@ def prestamo(id):
     saldo_admin = saldo_admin[0]
 
     if estado == "Rechazado":
-        dinero = 0
+        if dinero > 0:
+            estado = "Aprobado"
+            flash("⚠️ Ya cuenta con un prestamo activo no se puede otorgar mas prestamos", "warning")            
 
     if estado == "Aprobado":
         if dinero <= 0:

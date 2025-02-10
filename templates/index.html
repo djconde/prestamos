@@ -50,6 +50,9 @@
                                 <a href="{{ url_for('eliminar_usuario', id=usuario[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')"> 
                                     Eliminar
                                 </a>
+                                <a href="{{ url_for('eliminar_usuario', id=usuario[0]) }}" class="btn btn-info btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')"> 
+                                    Cuenta
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
