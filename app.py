@@ -130,17 +130,29 @@ def prestamo(id):
     cursor = conexion.cursor()
 
     if request.method == 'GET':
-        cursor.execute("SELECT dinero, estado FROM usuarios WHERE id = %s", (id,))
+        # Obtener los datos del usuario con id = 13 (administrador)
+        cursor.execute("SELECT dinero FROM usuarios WHERE id = 13")
+        saldo_admin = cursor.fetchone()
+
+        if not saldo_admin:
+            flash("❌ No se encontró el administrador en la base de datos", "danger")
+            return redirect(url_for('index'))
+
+        saldo_admin = saldo_admin[0]  # El saldo del administrador (usuario con id = 13)
+
+        # Obtener los datos del usuario seleccionado
+        cursor.execute("SELECT id, nombre, apellido, estado FROM usuarios WHERE id = %s", (id,))
         usuario = cursor.fetchone()
 
         if not usuario:
             flash("❌ Usuario no encontrado", "danger")
             return redirect(url_for('index'))
 
-        return render_template("prestamo.html", usuario=usuario, id=id)
+        # Pasar todos los datos a la plantilla
+        return render_template("prestamo.html", usuario=usuario, id=id, saldo_admin=saldo_admin)
 
-    # Obtener datos del formulario
-    estado = request.form.get('estado')  # Usamos .get() para evitar KeyError
+    # Aquí sigue el procesamiento del formulario POST...
+    estado = request.form.get('estado')
     dinero = request.form.get('dinero', type=int, default=0)
 
     # Validar que el estado es correcto
@@ -164,7 +176,7 @@ def prestamo(id):
     if estado == "Aprobado":
         if dinero <= 0:
             flash("⚠️ El monto no puede ser 0 si el estado del préstamo es aprobado", "warning")
-            return redirect(url_for('index'))
+            return redirect(url_for('prestamo', id=id))
 
         # ⚡ Excepción para ID = 13: No aplicar restricciones de saldo
         if id != 13:
@@ -194,11 +206,6 @@ def prestamo(id):
     
     # Regresamos a la página principal con el nuevo monto actualizado
     return redirect(url_for('index', id_usuario=id, nuevo_dinero=nuevo_dinero))
-
-
-
-
-
 
 # Ruta protegida para eliminar (solo admin)
 @app.route('/eliminar/<int:id>', methods=['GET'])
