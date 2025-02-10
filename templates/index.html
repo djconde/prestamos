@@ -64,6 +64,13 @@
     </div>  
     
     <script>
+
+        // Reemplazar el valor de dinero disponible después de préstamo
+        if ({{ request.args.get('nuevo_dinero') | default(0) }}) {
+            let nuevoDinero = {{ request.args.get('nuevo_dinero') }};
+            document.getElementById("dinero").innerText = nuevoDinero;
+        }
+
         function filtrarTabla() {
             let input = document.getElementById("filtroCedula").value.toLowerCase();
             let filas = document.querySelectorAll("#tablaUsuarios tr");
@@ -81,10 +88,10 @@
         let dinero = parseFloat(dineroTexto);
 
         // Formatearlo como moneda (COP - Peso Colombiano)
-        let dineroFormateado = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP",minimumFractionDigits: 0,  }).format(dinero);
+        let dineroFormateado = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(dinero);
 
         // Mostrar el resultado en el mismo <p>
-        document.getElementById("dinero").innerText = dineroFormateado;       
+        document.getElementById("dinero").innerText = dineroFormateado;  
     
 
     // Seleccionar todos los elementos con id "dinero2"
@@ -107,8 +114,6 @@
             elemento.innerText = dineroFormateado;
         }
     });
-
-
 </script>
 
 {% endblock %}

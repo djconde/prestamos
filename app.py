@@ -121,7 +121,7 @@ def editar_usuarios(id):
 @login_required
 def prestamo(id):
     """ Procesa la solicitud de préstamo, verificando saldo y actualizando el monto. """
-
+    
     conexion = obtener_conexion()
     if not conexion:
         flash("❌ Error al conectar con la base de datos", "danger")
@@ -182,12 +182,20 @@ def prestamo(id):
 
     # Actualizar estado y dinero del usuario
     cursor.execute("UPDATE usuarios SET estado = %s, dinero = %s WHERE id = %s", (estado, dinero, id))
-    
+
     conexion.commit()
+
+    # Obtener el nuevo saldo para mostrarlo en la vista actualizada
+    cursor.execute("SELECT dinero FROM usuarios WHERE id = 13")
+    nuevo_dinero = cursor.fetchone()[0]
     conexion.close()
 
     flash("✅ Préstamo procesado correctamente", "success")
-    return redirect(url_for('index'))
+    
+    # Regresamos a la página principal con el nuevo monto actualizado
+    return redirect(url_for('index', id_usuario=id, nuevo_dinero=nuevo_dinero))
+
+
 
 
 
