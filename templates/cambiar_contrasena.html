@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <h2>Cambiar Contraseña</h2>
+
+    <h3>Información del usuario: {{ usuario[0] }} {{ usuario[1] }} con cédula: {{ usuario[2] }}<br>
+        Username: {{ usuario[3] }}</h3>
+
+    <div class="card bg-dark text-light border-secondary">
+        <div class="card-header bg-secondary text-light">
+            <h4>Ingresa la contraseña actual de tu cuenta, y después ingresa la nueva contraseña</h4>
+        </div>
+        <div class="card-body">    
+            <form method="POST" action="{{ url_for('cambiar_contrasena', id=usuario[5]) }}">
+                
+                <label>Contraseña actual:</label>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" id="contrasena_actual" name="contrasena_actual" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('contrasena_actual')">👁️</button>
+                </div>
+
+                <label>Nueva contraseña:</label>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" id="nueva_contrasena" name="nueva_contrasena" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('nueva_contrasena')">👁️</button>
+                </div>
+
+                <label>Confirmar nueva contraseña:</label>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" id="confirmar_contrasena" name="confirmar_contrasena" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmar_contrasena')">👁️</button>
+                </div>
+
+                <button type="submit" class="btn btn-success">Actualizar Contraseña</button>        
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Volver a la Lista</a>
+            </form>
+        </div>
+    </div>
+
+<script>
+    function togglePassword(inputId) {
+        var input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+</script>
+
+{% endblock %}

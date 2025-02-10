@@ -54,8 +54,6 @@ def index():
                            dinero_admin=dinero_admin)
 
 
-
-
 # Ruta protegida para agregar usuarios (solo admin)
 @app.route('/registro', methods=['GET', 'POST'])
 @login_required
@@ -169,7 +167,7 @@ def prestamo(id):
 
         saldo_admin = saldo_admin[0]  # El saldo del administrador (usuario con id = 13) 
         # Obtener los datos del usuario seleccionado
-        cursor.execute("SELECT id, nombre, apellido, dinero, estado FROM usuarios WHERE id = %s", (id,))
+        cursor.execute("SELECT id, nombre, apellido, dinero, estado,cedula, username, password FROM usuarios WHERE id = %s", (id,))
         usuario = cursor.fetchone()       
 
         if not usuario:
@@ -178,8 +176,7 @@ def prestamo(id):
         
         if usuario[4]=="Aprobado":
             flash("❌ El usuario ya tiene un Prestamo aprobado, este no se puede modificar", "danger")
-            return redirect(url_for('index'))
-        
+            return redirect(url_for('index'))        
         
 
         # Pasar todos los datos a la plantilla
@@ -278,6 +275,56 @@ def eliminar_usuario(id):
             return "Error al conectar a la base de datos."
     except Exception as e:
         return f"Error al eliminar usuario: {e}"
+    
+    
+@app.route('/cambiar_contrasena/<int:id>', methods=['GET', 'POST'])
+@login_required
+def cambiar_contrasena(id):
+    conexion = obtener_conexion()
+    if not conexion:
+        flash("❌ Error al conectar con la base de datos", "danger")
+        return redirect(url_for('index'))
+
+    cursor = conexion.cursor()
+    cursor.execute("SELECT nombre, apellido, cedula, username, password,id FROM usuarios WHERE id = %s", (id,))
+    usuario = cursor.fetchone()    
+
+    if not usuario:
+        flash("❌ Usuario no encontrado", "danger")
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        contrasena_actual = request.form['contrasena_actual']
+        nueva_contrasena = request.form['nueva_contrasena']
+        confirmar_contrasena = request.form['confirmar_contrasena']
+
+        # Verificar la contraseña actual
+        if not check_password_hash(usuario[4], contrasena_actual):
+            flash("❌ La contraseña actual es incorrecta", "danger")
+            return redirect(url_for('cambiar_contrasena', id=id))
+
+        # Validaciones de la nueva contraseña
+        if len(nueva_contrasena) < 5 or not any(c.isdigit() for c in nueva_contrasena) or not any(c.isalpha() for c in nueva_contrasena):
+            flash("⚠️ La nueva contraseña debe tener al menos 5 caracteres, incluir números y letras.", "warning")
+            return redirect(url_for('cambiar_contrasena', id=id))
+
+        if nueva_contrasena != confirmar_contrasena:
+            flash("⚠️ Las contraseñas no coinciden.", "warning")
+            return redirect(url_for('cambiar_contrasena', id=id))
+
+        # Actualizar la contraseña en la base de datos
+        nueva_contrasena_hashed = generate_password_hash(nueva_contrasena)
+        cursor.execute("UPDATE usuarios SET password = %s WHERE id = %s", (nueva_contrasena_hashed, id))
+        conexion.commit()
+        conexion.close()
+
+        flash("✅ Contraseña actualizada exitosamente", "success")
+        return redirect(url_for('index'))
+
+    return render_template('cambiar_contrasena.html', usuario=usuario)
+
+    
+    
     
 @app.route('/logout')
 @login_required
