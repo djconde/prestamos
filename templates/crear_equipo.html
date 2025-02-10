@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Equipo</title>
+    <!-- Cargar Bootstrap 5 desde CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Personalización del tema oscuro */
+        body {
+            background-color: #121212; /* Fondo oscuro */
+            color: #e0e0e0; /* Texto claro */
+        }
+        .card {
+            background-color: #1f1f1f; /* Fondo de tarjeta oscuro */
+            border: 1px solid #333; /* Borde de tarjeta más oscuro */
+        }
+        .card-header, .card-footer {
+            background-color: #2c2c2c; /* Encabezado y pie de tarjeta con color más oscuro */
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #0056b3;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <h1 class="text-center mb-4">Agregar Nuevo Equipo</h1>
+    
+    <!-- Formulario de Agregar Nuevo equipo -->
+    <div class="container mt-5">
+        <form method="POST" action="/agregar">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Equipo</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
+            </div>
+            <div class="mb-3">
+                <label for="estrellas" class="form-label">Estrellas</label>
+                <input type="number" class="form-control" id="estrellas" name="estrellas" required>
+            </div>
+            <div class="mb-3">
+                <label for="codigo_unico" class="form-label">Codigo Unico</label>
+                <input type="number" class="form-control" id="codigo_unico" name="codigo_unico" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Agregar Equipo</button>
+            <a href="/" class="btn btn-secondary">Regresar a la lista</a>
+        </form>
+    </div>
+   
+</div>
+
+<!-- Cargar Bootstrap JS desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

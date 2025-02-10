@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %} 
+
+<div class="container py-5">
+    <h1 class="text-center mb-4 text-light">Editar Usuarios</h1>
+    
+    <!-- Formulario de editar usuario -->
+    <div class="card bg-dark text-light border-secondary">
+        <div class="card-header bg-secondary text-light">
+            <h4>Modificar Información del Usuario</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombres</label>
+                    <input type="text" class="form-control  border-secondary" id="nombre" name="nombre" value="{{ usuario[5] }}">
+                </div>
+                <div class="mb-3">
+                    <label for="apellido" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control  border-secondary" id="apellido" name="apellido" value="{{ usuario[6] }}">
+                </div>
+                <div class="mb-3">
+                    <label for="cedula" class="form-label">Cédula</label>
+                    <input type="number" class="form-control  border-secondary" id="cedula" name="cedula" value="{{ usuario[4] }}">
+                </div>                                
+                <div class="mb-3">
+                    <label for="rol" class="form-label">Rol</label>
+                    <select class="form-select  border-secondary" id="rol" name="rol">
+                        <option value="usuario" {% if usuario[9] == 'usuario' %}selected{% endif %}>Usuario</option>
+                        <option value="admin" {% if usuario[9] == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                </div>                                      
+                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            </form>
+        </div>
+        <div class="card-footer text-center bg-secondary">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Volver a la Lista</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        var input = document.getElementById("password");
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+</script>
+
+
+{% endblock %}

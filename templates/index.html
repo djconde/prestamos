@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center text-warning">
+        Bienvenido, {{ session['nombre'] }} {{ session['apellido'] }}
+    </h1>
+    <h2 class="text-center">
+        Dinero Disponible para prestamos:
+        <p id = "dinero">{{ session['dinero'] }}!</p>
+    </h2>
+    
+
+    <h1 class="text-center mb-4">Usuarios Registrados</h1>
+
+    <div class="card-body">
+        <!-- Campo de búsqueda -->
+        <div class="mb-3">
+            <input type="text" id="filtroCedula" class="form-control" placeholder="🔎 Buscar por número de cédula..." onkeyup="filtrarTabla()">
+        </div>
+    
+        <div class="table-responsive">
+            <table class="table table-dark table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
+                        <th>Cédula</th>
+                        <th>Dinero</th>
+                        <th>Estado</th>
+                        <th>Username</th>                        
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaUsuarios">
+                    {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario[0] }}</td>
+                            <td>{{ usuario[5] }}</td>
+                            <td>{{ usuario[6] }}</td>
+                            <td class="cedula">{{ usuario[4] }}</td> <!-- Identificador para búsqueda -->
+                            <td id="dinero2" >{{ usuario[7] }}</td>
+                            <td>{{ usuario[8] }}</td>
+                            <td>{{ usuario[1] }}</td>
+                            <td>{{ usuario[3] }}</td>
+                            <td>
+                                <a href="{{ url_for('prestamo', id=usuario[0]) }}" class="btn btn-success btn-sm">Prestamo</a>
+                                <a href="{{ url_for('editar_usuarios', id=usuario[0]) }}" class="btn btn-warning btn-sm">Editar</a>                                
+                                <a href="{{ url_for('eliminar_usuario', id=usuario[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')"> 
+                                    Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card-footer text-center">
+        <small>Desarrollado con Flask y MySQL</small>
+    </div>  
+    
+    <script>
+        function filtrarTabla() {
+            let input = document.getElementById("filtroCedula").value.toLowerCase();
+            let filas = document.querySelectorAll("#tablaUsuarios tr");
+    
+            filas.forEach(fila => {
+                let cedula = fila.querySelector(".cedula").textContent.toLowerCase();
+                fila.style.display = cedula.includes(input) ? "" : "none";
+            });
+        }
+   
+        // Obtener el valor de la sesión en la etiqueta <p>
+        let dineroTexto = document.getElementById("dinero").innerText;
+
+        // Convertir a número
+        let dinero = parseFloat(dineroTexto);
+
+        // Formatearlo como moneda (COP - Peso Colombiano)
+        let dineroFormateado = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP",minimumFractionDigits: 0,  }).format(dinero);
+
+        // Mostrar el resultado en el mismo <p>
+        document.getElementById("dinero").innerText = dineroFormateado;       
+    
+
+    // Seleccionar todos los elementos con id "dinero2"
+        let dineroElementos = document.querySelectorAll("#dinero2");
+
+        dineroElementos.forEach(elemento => {
+        let dineroTexto = elemento.innerText.trim();  // Obtener el valor del <td>
+        let dinero = parseFloat(dineroTexto);  // Convertir a número
+
+        if (!isNaN(dinero)) {
+            // Formatear como moneda colombiana sin decimales
+            let dineroFormateado = new Intl.NumberFormat("es-CO", { 
+                style: "currency", 
+                currency: "COP",
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0  
+            }).format(dinero);
+
+            // Actualizar el texto del <td>
+            elemento.innerText = dineroFormateado;
+        }
+    });
+
+
+</script>
+
+{% endblock %}
