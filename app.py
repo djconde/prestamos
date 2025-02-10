@@ -4,6 +4,8 @@ from auth import auth, login_manager
 from database import obtener_conexion
 from flask_login import logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import logging
+
 
 app = Flask(__name__)
 app.secret_key = "mi_secreto"  # Necesario para usar flash messages
@@ -133,16 +135,17 @@ def prestamo(id):
         # Obtener los datos del usuario con id = 13 (administrador)
         cursor.execute("SELECT dinero FROM usuarios WHERE id = 13")
         saldo_admin = cursor.fetchone()
-
+        
         if not saldo_admin:
             flash("❌ No se encontró el administrador en la base de datos", "danger")
             return redirect(url_for('index'))
 
-        saldo_admin = saldo_admin[0]  # El saldo del administrador (usuario con id = 13)
+        saldo_admin = saldo_admin[0]  # El saldo del administrador (usuario con id = 13) 
+        #logging.warning(f"Saldo del administrador: {saldo_admin}")   #imprimir algun valor en consola          
 
         # Obtener los datos del usuario seleccionado
-        cursor.execute("SELECT id, nombre, apellido, estado FROM usuarios WHERE id = %s", (id,))
-        usuario = cursor.fetchone()
+        cursor.execute("SELECT id, nombre, apellido, dinero, estado FROM usuarios WHERE id = %s", (id,))
+        usuario = cursor.fetchone()       
 
         if not usuario:
             flash("❌ Usuario no encontrado", "danger")
@@ -202,7 +205,7 @@ def prestamo(id):
     nuevo_dinero = cursor.fetchone()[0]
     conexion.close()
 
-    flash("✅ Préstamo procesado correctamente", "success")
+    flash("✅ Préstamo procesado correctamente", "success")    
     
     # Regresamos a la página principal con el nuevo monto actualizado
     return redirect(url_for('index', id_usuario=id, nuevo_dinero=nuevo_dinero))

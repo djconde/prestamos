@@ -2,14 +2,13 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="text-center text-warning">
+    <h2 class="text-center">
         Bienvenido, {{ session['nombre'] }} {{ session['apellido'] }}
-    </h1>
+    </h2>
     <h2 class="text-center">
         Dinero Disponible para prestamos:
-        <p id = "dinero">{{ session['dinero'] }}!</p>
-    </h2>
-    
+        <p id = "dinero">${{ session['dinero_admin'] }}</p>
+    </h2>   
 
     <h1 class="text-center mb-4">Usuarios Registrados</h1>
 
