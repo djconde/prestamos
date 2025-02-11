@@ -420,15 +420,85 @@ def contrasena_usuario(id):
 def inicio():
     return render_template('index.html')
     
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()  # Cierra la sesión
-    flash("✅ Has cerrado sesión", "info")
-    return redirect(url_for('auth.login'))
+from flask import flash, redirect, url_for
 
-def inject_user():
-    return dict(session=session)
+@app.route('/abonar', methods=['POST'])
+@login_required
+def abonar():
+    conexion = None  # Definir la variable antes del try
+
+    try:
+        data = request.form  # Cambia a request.form si usas un formulario en HTML
+        abono = float(data.get('abono'))
+        user_id = session.get('usuario_id')
+
+        if not user_id:
+            flash("⚠️ Usuario no autenticado", "danger")
+            return redirect(url_for('usuarios'))  # Ajusta la ruta según tu app
+
+        conexion = obtener_conexion()
+        if not conexion:
+            flash("❌ Error en la conexión a la base de datos", "danger")
+            return redirect(url_for('usuarios'))
+
+        with conexion.cursor() as cursor:
+            # Obtener datos del usuario
+            cursor.execute("SELECT dinero, estado FROM usuarios WHERE id = %s", (user_id,))
+            usuario = cursor.fetchone()
+
+            if not usuario:
+                flash("⚠️ Usuario no encontrado", "danger")
+                return redirect(url_for('usuarios'))
+
+            dinero_usuario, estado_usuario = usuario
+
+            if abono <= 0:
+                flash("⚠️ El monto a abonar debe ser mayor a 0", "warning")
+                return redirect(url_for('usuarios'))
+
+            if abono > dinero_usuario:
+                flash("⚠️ No puedes abonar más de lo que tienes disponible", "warning")
+                return redirect(url_for('usuarios'))
+
+            # Obtener dinero del admin (ID=13)
+            cursor.execute("SELECT dinero FROM usuarios WHERE id = 13")
+            admin = cursor.fetchone()
+
+            if not admin:
+                flash("⚠️ Administrador no encontrado", "danger")
+                return redirect(url_for('usuarios'))
+
+            dinero_admin = admin[0]
+
+            # Actualizar valores en la base de datos
+            nuevo_dinero_usuario = dinero_usuario - abono
+            nuevo_dinero_admin = dinero_admin + abono
+
+            cursor.execute("UPDATE usuarios SET dinero = %s WHERE id = %s", (nuevo_dinero_usuario, user_id))
+            cursor.execute("UPDATE usuarios SET dinero = %s WHERE id = 13", (nuevo_dinero_admin,))
+
+            # Si el usuario ya pagó todo, cambiar estado a "Rechazado"
+            if nuevo_dinero_usuario == 0:
+                estado_usuario = "Rechazado"
+                cursor.execute("UPDATE usuarios SET estado = %s WHERE id = %s", (estado_usuario, user_id))
+
+            conexion.commit()
+
+            # Actualizar sesión
+            session['dinero'] = nuevo_dinero_usuario
+            session['estado'] = estado_usuario
+
+            flash("✅ Abono realizado con éxito", "success")
+            return redirect(url_for('usuarios'))
+
+    except Exception as e:
+        flash(f"❌ Error: {str(e)}", "danger")
+        return redirect(url_for('usuarios'))
+
+    finally:
+        if conexion:
+            conexion.close()
+
 
 
 
