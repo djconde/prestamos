@@ -369,6 +369,52 @@ def cambiar_contrasena(id):
 
     return render_template('cambiar_contrasena.html', usuario=usuario)
 
+@app.route('/contrasena_usuario/<int:id>', methods=['GET', 'POST'])
+@login_required
+def contrasena_usuario(id):
+    conexion = obtener_conexion()
+    if not conexion:
+        flash("❌ Error al conectar con la base de datos", "danger")
+        return redirect(url_for('usuarios'))
+
+    cursor = conexion.cursor()
+    cursor.execute("SELECT nombre, apellido, cedula, username, password,id FROM usuarios WHERE id = %s", (id,))
+    usuario = cursor.fetchone()    
+
+    if not usuario:
+        flash("❌ Usuario no encontrado", "danger")
+        return redirect(url_for('usuarios'))
+
+    if request.method == 'POST':
+        contrasena_actual = request.form['contrasena_actual']
+        nueva_contrasena = request.form['nueva_contrasena']
+        confirmar_contrasena = request.form['confirmar_contrasena']
+
+        # Verificar la contraseña actual
+        if not check_password_hash(usuario[4], contrasena_actual):
+            flash("❌ La contraseña actual es incorrecta", "danger")
+            return redirect(url_for('contrasena_usuario', id=id))
+
+        # Validaciones de la nueva contraseña
+        if len(nueva_contrasena) < 5 or not any(c.isdigit() for c in nueva_contrasena) or not any(c.isalpha() for c in nueva_contrasena):
+            flash("⚠️ La nueva contraseña debe tener al menos 5 caracteres, incluir números y letras.", "warning")
+            return redirect(url_for('contrasena_usuario', id=id))
+
+        if nueva_contrasena != confirmar_contrasena:
+            flash("⚠️ Las contraseñas no coinciden.", "warning")
+            return redirect(url_for('contrasena_usuario', id=id))
+
+        # Actualizar la contraseña en la base de datos
+        nueva_contrasena_hashed = generate_password_hash(nueva_contrasena)
+        cursor.execute("UPDATE usuarios SET password = %s WHERE id = %s", (nueva_contrasena_hashed, id))
+        conexion.commit()
+        conexion.close()
+
+        flash("✅ Contraseña actualizada exitosamente", "success")
+        return redirect(url_for('usuarios'))
+
+    return render_template('contrasena_usuario.html', usuario=usuario)
+
 # Rutas de la aplicación principal
 @app.route('/inicio')
 def inicio():
