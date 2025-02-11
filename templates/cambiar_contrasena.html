@@ -12,7 +12,7 @@
             <h4>Ingresa la contraseña actual de tu cuenta, y después ingresa la nueva contraseña</h4>
         </div>
         <div class="card-body">    
-            <form method="POST" action="{{ url_for('contrasena_usuario', id=usuario[5]) }}">
+            <form method="POST" action="{{ url_for('cambiar_contrasena', id=usuario[5]) }}">
                 
                 <label>Contraseña actual:</label>
                 <div class="input-group mb-3">
@@ -33,7 +33,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-success">Actualizar Contraseña</button>        
-                <a href="{{ url_for('usuarios') }}" class="btn btn-primary">Volver a la Lista</a>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Volver a la Lista</a>
             </form>
         </div>
     </div>

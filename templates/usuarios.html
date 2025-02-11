@@ -2,22 +2,39 @@
 
 {% block content %}
 
-<div class="container py-5">
-    <h2 class="text-center">
-        Bienvenido, {{ session['nombre'] }} {{ session['apellido'] }} con cedula: {{ session['cedula'] }}
-    </h2>
-    <h2 class="text-center">
-        Estado de tu prestamo, <div class="text-success">{{ session['estado'] }} </div>
-    </h2>
-    <h2 class="text-center">
-        Dinero que tienes:
-        <p id = "dinero">{{ session['dinero'] }}</p>
-    </h2>
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+        <h2 class="mb-3">
+            Bienvenido, {{ session['nombre'] }} {{ session['apellido'] }} <br> 
+            Cédula: {{ session['cedula'] }}
+        </h2>
 
+        <h2 class="mb-3">
+            Estado de tu préstamo: <span class="text-success">{{ session['estado'] }}</span>
+        </h2>
 
-   <script>
+        <h2 class="mb-4">
+            Dinero disponible:
+            <p id="dinero" class="fw-bold text-warning fs-3">{{ session['dinero'] }}</p>
+        </h2>
+
+        <div class="card bg-dark text-light p-4 shadow-lg">
+            <div class="mb-3 d-flex justify-content-center align-items-center">
+                <label for="abono" class="form-label me-3 fs-5">Cantidad a abonar:</label>
+                <input type="number" class="form-control w-25 bg-secondary text-white border-0 text-center" id="abono" name="abono">
+                <button onclick="abonarDeuda()" class="btn btn-success ms-3">Abonar a deuda</button>
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center">
+                <label class="form-label me-3 fs-5">Deuda total:</label>
+                <button onclick="pagarDeudaTotal()" class="btn btn-danger">Pagar deuda total</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Formatear el saldo del administrador sin decimales
         let dineroTexto = document.getElementById("dinero").innerText.trim();
         let dineroUsuario = parseFloat(dineroTexto);
         
@@ -30,17 +47,15 @@
                     maximumFractionDigits: 0 
                 }).format(dineroUsuario);
         }
-                       
-                if (!isNaN(dinero)) {
-                    td.innerText = new Intl.NumberFormat("es-CO", { 
-                        style: "currency", 
-                        currency: "COP", 
-                        minimumFractionDigits: 0, 
-                        maximumFractionDigits: 0 
-                    }).format(dinero);
-                }
-            });
-        
-    </script>
-    
+    });
+
+    function abonarDeuda() {
+        alert("Función de abono en proceso...");
+    }
+
+    function pagarDeudaTotal() {
+        alert("Función de pago total en proceso...");
+    }
+</script>
+
 {% endblock %}
