@@ -1,0 +1,49 @@
+{% extends "baseusuarios.html" %}
+
+{% block content %} 
+
+<div class="container py-5">
+    <h1 class="text-center mb-4 text-light">Editar Usuario</h1>
+    
+    <!-- Formulario de editar usuario -->
+    <div class="card bg-dark text-light border-secondary">
+        <div class="card-header bg-secondary text-light">
+            <h4>Modificar Información del Usuario</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombres</label>
+                    <input type="text" class="form-control  border-secondary" id="nombre" name="nombre" value="{{ usuario['nombre'] }}">
+                </div>
+                <div class="mb-3">
+                    <label for="apellido" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control  border-secondary" id="apellido" name="apellido" value="{{ usuario['apellido'] }}">
+                </div>
+                <div class="mb-3">
+                    <label for="cedula" class="form-label">Cédula</label>
+                    <input type="number" class="form-control  border-secondary" id="cedula" name="cedula" value="{{ usuario['cedula'] }}">
+                </div>                              
+                                                    
+                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            </form>           
+        </div>
+        <div class="card-footer text-center bg-secondary">
+            <a href="{{ url_for('usuarios') }}" class="btn btn-primary">Volver a la Lista</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        var input = document.getElementById("password");
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+</script>
+
+
+{% endblock %}

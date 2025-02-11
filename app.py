@@ -31,7 +31,7 @@ def index():
     id_usuario = current_user.id
 
     # Obtener los datos actualizados del usuario desde la base de datos
-    cursor.execute("SELECT dinero FROM usuarios WHERE id = %s", (id_usuario,))
+    cursor.execute("SELECT * FROM usuarios WHERE id = %s", (id,))
     usuario_data = cursor.fetchone()
     
     if not usuario_data:
@@ -52,6 +52,31 @@ def index():
                            usuarios=usuarios, 
                            id_usuario=id_usuario, 
                            dinero_admin=dinero_admin)
+    
+@app.route('/usuarios')
+@login_required
+def usuarios():
+    # Conexión a la base de datos
+    conexion = obtener_conexion()   
+    if not conexion:
+        flash("❌ Error al conectar con la base de datos", "danger")
+        return "Error al conectar a la base de datos"
+    
+    cursor = conexion.cursor()
+
+    # Obtener el ID del usuario autenticado
+    id_usuario = current_user.id   
+
+    # Obtener todos los usuarios para mostrarlos en el index
+    cursor.execute("SELECT cedula FROM usuarios WHERE id = %s", (id_usuario,))
+    usuario = cursor.fetchone()
+
+    conexion.close()  # Cerrar la conexión
+
+    return render_template('usuarios.html', 
+                           usuario=usuario, 
+                           id_usuario=id_usuario, 
+                           )
 
 
 # Ruta protegida para agregar usuarios (solo admin)
@@ -105,8 +130,11 @@ def editar_usuarios(id):
     # Conexión a la base de datos
     conexion = obtener_conexion()
     if not conexion:
-        flash("❌ Error al obtener la conexión con la base de datos", "danger")
-        return redirect(url_for('index'))
+        flash("❌ Error al obtener la conexión con la base de datos", "danger")        
+        if current_user.rol != 'admin':  # Solo admin puede eliminar        
+            return redirect(url_for('usuarios'))
+        else:
+            return redirect(url_for('index'))       
 
     cursor = conexion.cursor()
 
@@ -119,16 +147,23 @@ def editar_usuarios(id):
         # Verificar si el usuario ya existe en otro equipo
         cursor.execute("SELECT id FROM usuarios WHERE cedula = %s", (cedula,))
         usuario_existente = cursor.fetchone()
-
-        # Si el código es único, actualiza los datos del equipo
-               
-        cursor.execute("UPDATE usuarios SET rol=%s, cedula=%s, nombre=%s, apellido=%s WHERE id=%s",
+        
+        if current_user.rol != 'admin':
+            # Si el código es único, actualiza los datos del equipo               
+            cursor.execute("UPDATE usuarios SET rol=%s, cedula=%s, nombre=%s, apellido=%s WHERE id=%s",
+                       ("usuario", cedula, nombre, apellido, id))
+            flash("✅ Usuario administrador ha actualizado correctamente", "success")
+            conexion.commit()
+            conexion.close()  
+            return redirect(url_for('usuarios'))
+        else:
+            # Si el código es único, actualiza los datos del equipo               
+            cursor.execute("UPDATE usuarios SET rol=%s, cedula=%s, nombre=%s, apellido=%s WHERE id=%s",
                        (rol, cedula, nombre, apellido, id))
-        conexion.commit()
-        conexion.close()
-
-        flash("✅ Usuario actualizado correctamente", "success")
-        return redirect(url_for('index'))
+            flash("✅ se ha actualizado correctamente tus datos", "success")
+            conexion.commit()
+            conexion.close()  
+            return redirect(url_for('index'))       
 
     # Si es una petición GET, obtener los datos del equipo
     cursor.execute("SELECT * FROM usuarios WHERE id=%s", (id,))
@@ -139,7 +174,11 @@ def editar_usuarios(id):
         flash("❌ El equipo no existe", "danger")
         return redirect(url_for('index'))
 
-    return render_template('editar_usuarios.html', usuario=usuario)
+    if current_user.rol != 'admin':
+        return render_template('editar_usuario.html', usuario=usuario)
+    else:
+        return render_template('editar_usuarios.html', usuario=usuario)
+
 
 @app.route('/prestamo/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -323,8 +362,10 @@ def cambiar_contrasena(id):
 
     return render_template('cambiar_contrasena.html', usuario=usuario)
 
-    
-    
+# Rutas de la aplicación principal
+@app.route('/inicio')
+def inicio():
+    return render_template('index.html')
     
 @app.route('/logout')
 @login_required

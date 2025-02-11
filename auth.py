@@ -64,7 +64,8 @@ def login():
                 session['nombre'] = user['nombre']
                 session['apellido'] = user['apellido']
                 session['dinero'] = user['dinero']
-                # flash(f"Dinero del usuario: {session['dinero']}", "info")                
+                session['cedula'] = user['cedula']
+                session['rol'] = user['rol']  # Guarda el rol en la sesión
                 
                 # Obtener el dinero del administrador (id=13)
                 cursor.execute("SELECT dinero FROM usuarios WHERE id = %s", (13,))
@@ -72,8 +73,15 @@ def login():
                 session['dinero_admin'] = admin['dinero']                 
                 
                 login_user(usuario)  # Iniciar sesión con Flask-Login
-                flash("✅ Inicio de sesión exitoso", "success")
-                return redirect(url_for('index'))
+                
+                
+                # Redirigir dependiendo del rol
+                if user["rol"] == "admin":
+                    flash("✅ Inicio de sesión exitoso Administrador", "success")
+                    return redirect(url_for('index'))  # Redirigir a la página principal para administradores
+                elif user["rol"] == "usuario":
+                    flash("✅ Inicio de sesión exitoso usuario", "success")
+                    return redirect(url_for('usuarios'))  # Redirigir a la página de usuarios normales
             else:
                 flash("❌ Usuario o contraseña incorrectos", "danger")            
 
@@ -131,7 +139,7 @@ def registrar():
             cursor = conexion.cursor()
             
             # Verifica si el usuario ya existe
-            cursor.execute("SELECT id FROM usuarios WHERE username = %s and cedula = %s", (username, cedula,))
+            cursor.execute("SELECT id FROM usuarios WHERE username = %s and cedula = %s", (username, cedula, ))
             usuario_existente = cursor.fetchone()
             
             if usuario_existente:
@@ -149,3 +157,5 @@ def registrar():
             
             return redirect(url_for('auth.login'))
     return render_template('registrar.html')
+
+
