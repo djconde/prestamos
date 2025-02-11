@@ -31,7 +31,7 @@ def index():
     id_usuario = current_user.id
 
     # Obtener los datos actualizados del usuario desde la base de datos
-    cursor.execute("SELECT * FROM usuarios WHERE id = %s", (id,))
+    cursor.execute("SELECT dinero FROM usuarios WHERE id = %s", (id_usuario,))
     usuario_data = cursor.fetchone()
     
     if not usuario_data:
