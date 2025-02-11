@@ -68,10 +68,21 @@ def usuarios():
     id_usuario = current_user.id   
 
     # Obtener todos los usuarios para mostrarlos en el index
-    cursor.execute("SELECT cedula FROM usuarios WHERE id = %s", (id_usuario,))
+    cursor.execute("SELECT id,nombre,apellido,estado,dinero,cedula FROM usuarios WHERE id = %s", (id_usuario,))
     usuario = cursor.fetchone()
 
     conexion.close()  # Cerrar la conexión
+    
+    if usuario:
+        # Actualizar los datos en la sesión
+        session['nombre'] = usuario[1]
+        session['apellido'] = usuario[2]
+        session['estado'] = usuario[3]
+        session['dinero'] = usuario[4]
+        session['cedula'] = usuario[5]
+    else:
+        flash("❌ Usuario no encontrado", "danger")
+        return redirect(url_for('usuarios'))  # O alguna otra página de error
 
     return render_template('usuarios.html', 
                            usuario=usuario, 
@@ -93,7 +104,7 @@ def registro():
         cedula = request.form['cedula']
         username = request.form['username']
         password = request.form['password']
-        rol = request.form['rol']
+        rol = request.form.get('rol','usuario')
         
      
         # Conexión a la base de datos
@@ -152,7 +163,7 @@ def editar_usuarios(id):
             # Si el código es único, actualiza los datos del equipo               
             cursor.execute("UPDATE usuarios SET rol=%s, cedula=%s, nombre=%s, apellido=%s WHERE id=%s",
                        ("usuario", cedula, nombre, apellido, id))
-            flash("✅ Usuario administrador ha actualizado correctamente", "success")
+            flash("✅ Usuario normal se ha actualizado correctamente", "success")
             conexion.commit()
             conexion.close()  
             return redirect(url_for('usuarios'))
@@ -160,7 +171,7 @@ def editar_usuarios(id):
             # Si el código es único, actualiza los datos del equipo               
             cursor.execute("UPDATE usuarios SET rol=%s, cedula=%s, nombre=%s, apellido=%s WHERE id=%s",
                        (rol, cedula, nombre, apellido, id))
-            flash("✅ se ha actualizado correctamente tus datos", "success")
+            flash("✅ Usuario Administrador ha actualizado datos", "success")
             conexion.commit()
             conexion.close()  
             return redirect(url_for('index'))       
@@ -168,11 +179,7 @@ def editar_usuarios(id):
     # Si es una petición GET, obtener los datos del equipo
     cursor.execute("SELECT * FROM usuarios WHERE id=%s", (id,))
     usuario = cursor.fetchone()
-    conexion.close()   
-
-    if not usuario:
-        flash("❌ El equipo no existe", "danger")
-        return redirect(url_for('index'))
+    conexion.close()       
 
     if current_user.rol != 'admin':
         return render_template('editar_usuario.html', usuario=usuario)

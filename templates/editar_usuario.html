@@ -23,7 +23,16 @@
                 <div class="mb-3">
                     <label for="cedula" class="form-label">Cédula</label>
                     <input type="number" class="form-control  border-secondary" id="cedula" name="cedula" value="{{ usuario['cedula'] }}">
-                </div>                              
+                </div>
+                {% if current_user.rol == "admin" %}
+                    <label for="rol">Rol:</label>
+                    <select id="rol" name="rol" class="form-control">
+                        <option value="usuario" {% if usuario['rol'] == 'usuario' %}selected{% endif %}>Usuario</option>
+                        <option value="admin" {% if usuario['rol'] == 'admin' %}selected{% endif %}>Administrador</option>
+                    </select>
+                {% else %}
+                    <input type="hidden" name="rol" value="usuario">
+                {% endif %}                              
                                                     
                 <button type="submit" class="btn btn-success">Guardar Cambios</button>
             </form>           

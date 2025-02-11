@@ -1,6 +1,46 @@
 {% extends "baseusuarios.html" %}
 
-{% block content %}  
-    
+{% block content %}
+
+<div class="container py-5">
+    <h2 class="text-center">
+        Bienvenido, {{ session['nombre'] }} {{ session['apellido'] }} con cedula: {{ session['cedula'] }}
+    </h2>
+    <h2 class="text-center">
+        Estado de tu prestamo, <div class="text-success">{{ session['estado'] }} </div>
+    </h2>
+    <h2 class="text-center">
+        Dinero que tienes:
+        <p id = "dinero">{{ session['dinero'] }}</p>
+    </h2>
+
+
+   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Formatear el saldo del administrador sin decimales
+        let dineroTexto = document.getElementById("dinero").innerText.trim();
+        let dineroUsuario = parseFloat(dineroTexto);
+        
+        if (!isNaN(dineroUsuario)) {
+            document.getElementById("dinero").innerText = 
+                new Intl.NumberFormat("es-CO", { 
+                    style: "currency", 
+                    currency: "COP", 
+                    minimumFractionDigits: 0, 
+                    maximumFractionDigits: 0 
+                }).format(dineroUsuario);
+        }
+                       
+                if (!isNaN(dinero)) {
+                    td.innerText = new Intl.NumberFormat("es-CO", { 
+                        style: "currency", 
+                        currency: "COP", 
+                        minimumFractionDigits: 0, 
+                        maximumFractionDigits: 0 
+                    }).format(dinero);
+                }
+            });
+        
+    </script>
     
 {% endblock %}

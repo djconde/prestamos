@@ -65,7 +65,8 @@ def login():
                 session['apellido'] = user['apellido']
                 session['dinero'] = user['dinero']
                 session['cedula'] = user['cedula']
-                session['rol'] = user['rol']  # Guarda el rol en la sesión
+                session['rol'] = user['rol']
+                session['estado'] = user['estado']
                 
                 # Obtener el dinero del administrador (id=13)
                 cursor.execute("SELECT dinero FROM usuarios WHERE id = %s", (13,))
